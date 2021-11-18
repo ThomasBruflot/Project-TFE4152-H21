@@ -1,0 +1,25 @@
+# read design
+read_verilog -sv pixelTop.v
+read_verilog pixelSensor.v
+read_verilog pixelArray.v
+read_verilog pixelState.v
+hierarchy -top pixelTop
+
+# high-level synthesis
+proc; opt; memory; opt; fsm; opt
+
+# low-level synthesis
+techmap; opt
+
+synth
+
+# map to target architecture
+dfflibmap -liberty pixelTop_cells.lib
+abc -liberty pixelTop.lib
+
+# write synthesized design
+write_verilog pixelTop_netlist.v
+write_spice pixelTop_netlist.sp
+
+# cleanup
+clean
