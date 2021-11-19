@@ -1,4 +1,4 @@
-module graycounter(out, clk, reset);
+module graycounter(out, clk, reset); // This module was not implemented
    output [WIDTH-1 : 0] out;
    input                clk, reset;
 
