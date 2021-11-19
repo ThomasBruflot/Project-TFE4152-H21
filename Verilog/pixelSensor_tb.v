@@ -51,7 +51,7 @@ module pixelSensor_tb;
    //------------------------------------------------------------
    // Pixel
    //------------------------------------------------------------
-   parameter real    dv_pixel = 0.5;  //Set the expected photodiode current (0-1)
+   parameter real    dv_pixel = 5;  //Set the expected photodiode current (0-1)
 
    //Analog signals
    logic              anaBias1;
