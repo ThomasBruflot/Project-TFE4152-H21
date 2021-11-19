@@ -3,14 +3,14 @@
 module PIXEL_STATE (clock, reset, erase, expose, convert, read);
     input clock, reset;
     output logic erase, expose, convert;
-	output logic [row-1:0] read;
+	output logic [row-1:0] read; // one read signal for each row
 
-	parameter int col=4,row=4;
+	parameter int col=4,row=4; // this will be overwritten in pixelTop_tb
     parameter ERASE=0, EXPOSE=1, CONVERT=2, READ=3, IDLE=4; 
     
-    logic [2:0] state, next_state;
-	logic [row-1:0] read2;
-	integer           counter;            //Delay counter in state machine
+    logic [2:0] state, next_state; // holds the current and next states
+	logic [row-1:0] read_tmp; // holds the array which indicates what row is reading
+	integer           counter;    // counts the number of clock cycles that have passed
 
 	//State duration in clock cycles
 	parameter integer c_erase = 5;
@@ -28,7 +28,6 @@ module PIXEL_STATE (clock, reset, erase, expose, convert, read);
 			counter = 0;
 		end
 		else begin
-			// pixel nr. 1 
 			case (state)
 			ERASE: begin
 				if(counter == c_erase) begin 
@@ -45,36 +44,36 @@ module PIXEL_STATE (clock, reset, erase, expose, convert, read);
 			CONVERT: begin
 				if(counter == c_convert) begin
 					next_state = READ;
-					read2 = 1;
+					read_tmp = 1; // here read_tmp is set e.g. 000001 
 					state = IDLE; 
 				end
 			end
 			READ: begin
-				if((counter%c_read == 0) && (counter != 0))begin 
-					read2 = read2 << 1;
+				if((counter%c_read == 0) && (counter != 0))begin // Every time five clock cycles have pased we left shft the 1 and give the next row permission to read 
+					read_tmp = read_tmp << 1; // we left shift
 				end
-				if(counter == c_read*row) begin // when read is done ps1,2,3 will wait for ps3 to be done reading before next_state is set to erase
+				if(counter == c_read*row) begin // when read is done for all the rows next_state is set to erase for all the pixels 
 					state = IDLE; 
 					next_state = ERASE;
 				end
 			end
 			IDLE:
-				state <= next_state;
+				state <= next_state; // once we are in IDLE state is set to next state 
 			endcase // case (state)
 			if(state == IDLE)
-			counter = 0;
+			counter = 0; // the counter is reset in IDLE
 			else
-			counter = counter + 1;
+			counter = counter + 1; // otherwise we incerment
 		end
 	end
 
 	// Control the output signals
-	always_ff @(negedge clock ) begin
+	always_ff @(negedge clock ) begin // Here we set the output values of the module (that contorl the pixel array) 
 		case(state)
-			ERASE: begin
-			erase <= 1;
+			ERASE: begin // the values are set according to what state we are in
+			erase <= 1; 
 			read <= 0;
-			expose <= 0; // expose[0] here and so on..
+			expose <= 0; 
 			convert <= 0;
 			end
 			EXPOSE: begin
@@ -91,7 +90,7 @@ module PIXEL_STATE (clock, reset, erase, expose, convert, read);
 			end
 			READ: begin
 			erase <= 0;
-			read <= read2;
+			read <= read_tmp; // read is here set to an array of the same size as the number of rows, that has a 1 at one of the bits, indicating which row can read
 			expose <= 0;
 			convert <= 0;
 			end
