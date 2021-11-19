@@ -45,10 +45,10 @@ module PIXEL_SENSOR
 
    );
 
-   real             v_erase = 1.2; // lowes voltage at capacitor
-   real             lsb = v_erase/255; // finds the init value at the capacitor, and sets this to lsb
+   real             v_erase = 1.2; 
+   real             lsb = v_erase/255; 
    parameter [3:0]  dv_pixel_int = 5;
-   real dv_pixel = $itor(dv_pixel_int)/10;//dv_pixel_int/10; 
+   real dv_pixel = $itor(dv_pixel_int)/10;  // devides dv_pixel by 10 so that we get a value between 0-1
 
    real             tmp; //temperary value
    logic            cmp; //comparator
@@ -73,7 +73,7 @@ module PIXEL_SENSOR
    // Use bias to provide a clock for integration when exposing
    always @(posedge VBN1) begin
       if(EXPOSE)
-        tmp = tmp - dv_pixel*lsb; // tmp is now the value at VSTORE in descrete form, DONT THINK SO
+        tmp = tmp - dv_pixel*lsb; 
    end
 
    //----------------------------------------------------------------
@@ -82,9 +82,9 @@ module PIXEL_SENSOR
    // Use ramp to provide a clock for ADC conversion, assume that ramp
    // and DATA are synchronous
    always @(posedge RAMP) begin
-      adc = adc + lsb; // increment adc for each ramp pos edge
+      adc = adc + lsb; 
       if(adc > tmp)
-        cmp <= 1; //if they are both alike then cmp = 1, acts as an comparator
+        cmp <= 1; 
    end
 
    //----------------------------------------------------------------
@@ -92,7 +92,7 @@ module PIXEL_SENSOR
    //----------------------------------------------------------------
    always_comb  begin
       if(!cmp) begin
-         p_data = DATA; // DATA er en counter som teller oppover fram til cmp = 1, da sier vi at den verdien er da den beholder
+         p_data = DATA; // DATA is a counter that counts upward, when cmp goes low p_data latches the latest value
       end
 
    end
